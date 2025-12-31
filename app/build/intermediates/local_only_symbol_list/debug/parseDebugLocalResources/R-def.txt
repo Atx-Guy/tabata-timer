@@ -1,6 +1,10 @@
 R_DEF: Internal format may change without notice
 local
+color BrandPrimary
+color BrandSecondary
 drawable ic_launcher
+raw rest
+raw work
 string app_name
 style Theme.TabataTimer
 xml backup_rules

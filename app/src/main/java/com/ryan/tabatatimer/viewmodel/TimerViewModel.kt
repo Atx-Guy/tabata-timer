@@ -39,6 +39,14 @@ class TimerViewModel : ViewModel() {
         if (_state.value.phase == TimerPhase.FINISHED) {
             resetTimer()
         }
+        
+        // GUARD: Prevent "Divide by Zero" or Invalid State by checking inputs
+        val config = _config.value
+        if (config.workTimeSeconds <= 0) {
+            // Cannot start timer with 0 work time
+            return
+        }
+
         _state.update { it.copy(isRunning = true) }
         timerJob = viewModelScope.launch {
             while (_state.value.isRunning) {

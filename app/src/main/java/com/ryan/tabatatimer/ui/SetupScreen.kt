@@ -1,32 +1,104 @@
 package com.ryan.tabatatimer.ui
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ryan.tabatatimer.model.Workout
+import com.ryan.tabatatimer.util.SoundManager
 import com.ryan.tabatatimer.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetupScreen(
     onStartTimer: (Workout) -> Unit,
-    viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory)
+    viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
+    soundManager: SoundManager
 ) {
     val savedWorkouts by viewModel.savedWorkouts.collectAsState()
-    var showAddDialog by remember { mutableStateOf(false) }
+
+    // Editor State
+    val editorName by viewModel.editorName.collectAsState()
+    val editorWork by viewModel.editorWork.collectAsState()
+    val editorRest by viewModel.editorRest.collectAsState()
+    val editorRounds by viewModel.editorRounds.collectAsState()
+    val editorWarmup by viewModel.editorWarmup.collectAsState()
+    val editorWorkoutId by viewModel.editorWorkoutId.collectAsState()
+
+    val isAudioEnabled by soundManager.isAudioEnabled.collectAsState()
+
+    val scrollState = rememberScrollState()
+
+
+    var isOrganizeMode by remember { mutableStateOf(false) }
+    var showSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    LaunchedEffect(editorWorkoutId) {
+        if (editorWorkoutId != null) {
+            showSheet = true
+        }
+    }
 
     Scaffold(
+        floatingActionButton = {
+            if (!isOrganizeMode) {
+                FloatingActionButton(
+                    onClick = {
+                        viewModel.clearEditor()
+                        showSheet = true
+                    },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "New Workout")
+                }
+            }
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Tabata Timer") },
@@ -36,9 +108,23 @@ fun SetupScreen(
                 )
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Workout")
+        bottomBar = {
+            BottomAppBar(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.primary
+            ) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    TextButton(
+                        onClick = { isOrganizeMode = !isOrganizeMode },
+                        modifier = Modifier.align(Alignment.Center)
+                    ) {
+                        Text(
+                            text = if (isOrganizeMode) "DONE" else "ORGANIZE",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
     ) { padding ->
@@ -47,55 +133,108 @@ fun SetupScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp)
+                .verticalScroll(scrollState) // Make the whole screen scrollable
         ) {
+            // SAVED LIST SECTION
             Text(
                 text = "Saved Workouts",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            
+
             if (savedWorkouts.isEmpty()) {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No saved workouts. Create one!")
+                    Text("No saved workouts.")
                 }
             } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(bottom = 80.dp) // Space for bottom bar
                 ) {
-                    items(savedWorkouts) { workout ->
+                    savedWorkouts.forEach { workout ->
                         WorkoutCard(
                             workout = workout,
+                            isOrganizeMode = isOrganizeMode,
                             onPlay = { onStartTimer(workout) },
-                            onDelete = { viewModel.deleteWorkout(workout) }
+                            onDelete = { viewModel.deleteWorkout(workout) },
+                            onEdit = {
+                                viewModel.onEditRequest(workout)
+                            }
                         )
                     }
                 }
             }
         }
     }
+    
+    // Bottom Sheet Editor
+    if (showSheet) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showSheet = false
+                viewModel.clearEditor()
+            },
+            sheetState = sheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .padding(bottom = 24.dp)
+            ) {
+                Text(
+                    text = if (editorWorkoutId != null) "Edit Workout" else "Setup New Workout",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
 
-    if (showAddDialog) {
-        AddWorkoutDialog(
-            onDismiss = { showAddDialog = false },
-            onSave = { name, work, rest, rounds, warmup ->
-                viewModel.saveWorkout(name, work, rest, rounds, warmup)
-                showAddDialog = false
+                WorkoutEditor(
+                    name = editorName,
+                    onNameChange = { viewModel.updateEditorState(name = it) },
+                    work = editorWork,
+                    onWorkChange = { viewModel.updateEditorState(work = it) },
+                    rest = editorRest,
+                    onRestChange = { viewModel.updateEditorState(rest = it) },
+                    rounds = editorRounds,
+                    onRoundsChange = { viewModel.updateEditorState(rounds = it) },
+                    warmup = editorWarmup,
+                    onWarmupChange = { viewModel.updateEditorState(warmup = it) },
+                    isAudioEnabled = isAudioEnabled,
+                    onAudioEnabledChange = { soundManager.setAudioEnabled(it) },
+                    onSave = {
+                        viewModel.saveOrUpdateWorkout()
+                        showSheet = false
+                    },
+                    onClear = {
+                        viewModel.clearEditor()
+                        showSheet = false
+                    },
+                    isEditingConfig = editorWorkoutId != null
+                )
             }
-        )
+        }
     }
 }
 
 @Composable
 fun WorkoutCard(
     workout: Workout,
+    isOrganizeMode: Boolean,
     onPlay: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface, // DarkSurface
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -105,81 +244,50 @@ fun WorkoutCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = workout.name, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = workout.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary // Deep Crimson title
+                )
                 Text(
                     text = "${workout.rounds} rounds • ${workout.workDurationSeconds}s/${workout.restDurationSeconds}s",
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
+            // Actions
             Row {
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, "Delete")
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        Icons.Default.Edit,
+                        "Edit",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
-                FilledTonalIconButton(onClick = onPlay) {
-                    Icon(Icons.Default.PlayArrow, "Start")
+
+                Crossfade(targetState = isOrganizeMode, label = "ActionButtons") { organizing ->
+                    if (organizing) {
+                        IconButton(onClick = onDelete) {
+                            Icon(
+                                Icons.Default.Delete,
+                                "Delete",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    } else {
+                        FilledTonalIconButton(
+                            onClick = onPlay,
+                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary, // Teal
+                                contentColor = MaterialTheme.colorScheme.onSecondary
+                            )
+                        ) {
+                            Icon(Icons.Default.PlayArrow, "Start")
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun AddWorkoutDialog(
-    onDismiss: () -> Unit,
-    onSave: (String, Int, Int, Int, Int) -> Unit
-) {
-    var name by remember { mutableStateOf("My Tabata") }
-    var work by remember { mutableStateOf(20f) }
-    var rest by remember { mutableStateOf(10f) }
-    var rounds by remember { mutableStateOf(8f) }
-    var warmup by remember { mutableStateOf(5f) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("New Workout") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Name") }
-                )
-                SliderInput("Work", work, 5f, 300f) { work = it }
-                SliderInput("Rest", rest, 0f, 300f) { rest = it }
-                SliderInput("Rounds", rounds, 1f, 50f) { rounds = it }
-                SliderInput("Warmup", warmup, 0f, 60f) { warmup = it }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                onSave(name, work.toInt(), rest.toInt(), rounds.toInt(), warmup.toInt())
-            }) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-@Composable
-fun SliderInput(label: String, value: Float, min: Float, max: Float, onValueChange: (Float) -> Unit) {
-    Column {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(label, style = MaterialTheme.typography.bodyMedium)
-            Text("${value.toInt()}${if (label == "Rounds") "" else "s"}", style = MaterialTheme.typography.bodyMedium)
-        }
-        Slider(
-            value = value,
-            onValueChange = onValueChange,
-            valueRange = min..max,
-            steps = ((max - min) / (if(label == "Rounds") 1 else 5)).toInt() - 1 
-        )
     }
 }

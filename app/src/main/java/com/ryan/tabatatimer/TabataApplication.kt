@@ -17,6 +17,7 @@ class TabataApplication : Application() {
 
 interface AppContainer {
     val workoutRepository: WorkoutRepository
+    val soundManager: com.ryan.tabatatimer.util.SoundManager
 }
 
 class AppDefaultContainer(private val context: Context) : AppContainer {
@@ -26,5 +27,9 @@ class AppDefaultContainer(private val context: Context) : AppContainer {
 
     override val workoutRepository: WorkoutRepository by lazy {
         WorkoutRepository(database.workoutDao())
+    }
+
+    override val soundManager: com.ryan.tabatatimer.util.SoundManager by lazy {
+        com.ryan.tabatatimer.util.SoundManager(context)
     }
 }

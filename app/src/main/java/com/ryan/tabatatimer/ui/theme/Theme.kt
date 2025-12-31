@@ -17,14 +17,16 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = DeepCrimson,
+    primary = BrandPrimary,
     onPrimary = Color.White,
-    secondary = MutedTeal,
-    onSecondary = Color.Black, // High contrast for FAB icon
+    secondary = BrandSecondary,
+    onSecondary = Color.Black, // High contrast for FAB
     background = DarkBackground,
-    onBackground = OffWhite,
-    surface = DarkBackground, // Or slightly lighter if we want elevation visible, but brief says "Dark surface color"
-    onSurface = OffWhite,
+    onBackground = HighEmphasisWhite,
+    surface = DarkSurface,
+    onSurface = HighEmphasisWhite,
+    surfaceVariant = DarkSurface, // Ensure surfaces don't default to something else
+    onSurfaceVariant = OffWhite
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -45,9 +47,9 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun TabataTimerTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true, // Force Dark Theme by default
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Disable dynamic color to enforce brand identity
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -56,14 +58,14 @@ fun TabataTimerTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
         darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else -> DarkColorScheme // Fallback to Dark Scheme even if light theme is requested
     }
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            window.statusBarColor = colorScheme.background.toArgb() // Match background for seamless look
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 

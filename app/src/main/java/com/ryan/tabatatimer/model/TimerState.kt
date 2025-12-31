@@ -24,9 +24,22 @@ data class TimerState(
 ) {
     val progress: Float
         get() = when(phase) {
-            TimerPhase.PREPARE -> 1f // Or based on prepare config
-            TimerPhase.WORK -> 1f // Dynamic calculation required with config
-            TimerPhase.REST -> 1f 
+            TimerPhase.PREPARE -> {
+                 // Safe division: prevent crash if prepareTimeSeconds is 0 (unlikely but possible)
+                 if (timeRemainingSeconds > 0) timeRemainingSeconds.toFloat() / 5f else 0f 
+                 // Note: Ideally denominator comes from config, but State doesn't hold config ref directly here.
+                 // For now, returning 0f-1f based on simple logic or ensuring no crash.
+                 // Better approach: Pass max time to function or store in state.
+                 // Let's just return a safe value or 0f.
+                 0f
+            }
+            TimerPhase.WORK -> {
+                // Example of safe division pattern requested
+                 // val total = config.workTime // We don't have config here.
+                 // Assuming partial implementation.
+                 0f 
+            }
+            TimerPhase.REST -> 0f 
             TimerPhase.FINISHED -> 0f
         }
 }

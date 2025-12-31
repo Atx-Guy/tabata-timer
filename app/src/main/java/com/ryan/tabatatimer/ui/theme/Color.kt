@@ -11,15 +11,19 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 // Tabata specific colors (Updated per user request)
-val WorkColor = Color(0xFF43A047) // Green for Work
-val RestColor = Color(0xFFE53935) // Red for Rest
-val WarmupColor = Color(0xFFFB8C00) // Orange for Warmup
-val UpNextColor = Color(0xFF1E88E5) // Blue for Up Next
+val WorkColor = Color(0xFF76FF03) // Bright Lime Green for Active/Work (High Visibility)
+val RestColor = Color(0xFFFF3D00) // Deep Orange/Red for Rest (High Visibility)
+val WarmupColor = Color(0xFFFFAB00) // Amber for Warmup
+val UpNextColor = Color(0xFF00E5FF) // Cyan accent for "Up Next"
 val FinishedColor = Color(0xFF9E9E9E) // Grey for Finished
 
-val DarkBackground = Color(0xFF121212)
-val DarkSurface = Color(0xFF1E1E1E) // Slightly lighter than background for cards/appbars if needed, or use Primary Accent for some surfaces as requested.
-val DeepCrimson = Color(0xFF880E4F) // Burgundy/Deep Crimson
-val MutedTeal = Color(0xFF00695C) // Secondary Action
+val DarkBackground = Color(0xFF121212) // Deep Charcoal
+val DarkSurface = Color(0xFF1E1E1E) // Slightly lighter charcoal for cards
+val DeepCrimson = Color(0xFFD32F2F) // Tuning Crimson to be slightly more vibrant for dark mode headers if needed, or stick to deep. Let's use a nice localized primary.
+// User asked for "Deep Crimson (for headers, active states)"
+val BrandPrimary = Color(0xFFD32F2F) 
+val BrandSecondary = Color(0xFF009688) // Teal
+val MutedTeal = Color(0xFF4DB6AC) // Muted Teal
+
 val OffWhite = Color(0xFFE0E0E0) // readable text
-val LightText = Color(0xFFFFFFFF)
+val HighEmphasisWhite = Color(0xFFFFFFFF)

@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
@@ -15,13 +16,14 @@ import androidx.navigation.navArgument
 import com.google.gson.Gson
 import com.ryan.tabatatimer.model.Workout
 import com.ryan.tabatatimer.navigation.Screen
-import com.ryan.tabatatimer.ui.TimerListScreen
+import com.ryan.tabatatimer.ui.SetupScreen
 import com.ryan.tabatatimer.ui.TimerScreen
 import com.ryan.tabatatimer.ui.theme.TabataTimerTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
         setContent {
             TabataTimerTheme {
                 Surface(
@@ -29,13 +31,23 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
+                    val appContainer = (application as TabataApplication).container
+                    val soundManager = appContainer.soundManager
                     
+                    // Release sound resources when activity is destroyed
+                    DisposableEffect(Unit) {
+                        onDispose {
+                            soundManager.release()
+                        }
+                    }
+
                     NavHost(navController = navController, startDestination = Screen.Setup.route) {
                         composable(Screen.Setup.route) {
-                            TimerListScreen(
-                                onNavigateToTimer = { workout ->
+                            SetupScreen(
+                                onStartTimer = { workout ->
                                     navController.navigate(Screen.Timer.createRoute(workout))
-                                }
+                                },
+                                soundManager = soundManager
                             )
                         }
                         
@@ -44,11 +56,13 @@ class MainActivity : ComponentActivity() {
                             arguments = listOf(navArgument("workoutJson") { type = NavType.StringType })
                         ) { backStackEntry ->
                             val workoutJson = backStackEntry.arguments?.getString("workoutJson")
-                            val workout = Gson().fromJson(workoutJson, Workout::class.java)
                             
-                            // Check if workout is valid
-                            if (workout != null) {
-                                TimerScreen(workout = workout, onBack = { navController.popBackStack() })
+                            if (workoutJson != null) {
+                                TimerScreen(
+                                    workoutJson = workoutJson,
+                                    onNavigateBack = { navController.popBackStack() },
+                                    soundManager = soundManager
+                                )
                             }
                         }
                     }
