@@ -6,10 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.google.gson.Gson
+import com.ryan.tabatatimer.model.Workout
+import com.ryan.tabatatimer.navigation.Screen
+import com.ryan.tabatatimer.ui.TimerListScreen
 import com.ryan.tabatatimer.ui.TimerScreen
 import com.ryan.tabatatimer.ui.theme.TabataTimerTheme
 
@@ -18,30 +24,36 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             TabataTimerTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    TimerScreen()
+                    val navController = rememberNavController()
+                    
+                    NavHost(navController = navController, startDestination = Screen.Setup.route) {
+                        composable(Screen.Setup.route) {
+                            TimerListScreen(
+                                onNavigateToTimer = { workout ->
+                                    navController.navigate(Screen.Timer.createRoute(workout))
+                                }
+                            )
+                        }
+                        
+                        composable(
+                            route = Screen.Timer.route,
+                            arguments = listOf(navArgument("workoutJson") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val workoutJson = backStackEntry.arguments?.getString("workoutJson")
+                            val workout = Gson().fromJson(workoutJson, Workout::class.java)
+                            
+                            // Check if workout is valid
+                            if (workout != null) {
+                                TimerScreen(workout = workout, onBack = { navController.popBackStack() })
+                            }
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    TabataTimerTheme {
-        Greeting("Android")
     }
 }

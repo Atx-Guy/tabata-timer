@@ -11,14 +11,20 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = DeepCrimson,
+    onPrimary = Color.White,
+    secondary = MutedTeal,
+    onSecondary = Color.Black, // High contrast for FAB icon
+    background = DarkBackground,
+    onBackground = OffWhite,
+    surface = DarkBackground, // Or slightly lighter if we want elevation visible, but brief says "Dark surface color"
+    onSurface = OffWhite,
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -49,7 +55,6 @@ fun TabataTimerTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
