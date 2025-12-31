@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.ryan.tabatatimer.app-mergeDebugResources-50:/values-fr-rCA/values-fr-rCA.xml",
+            "outputFile": "com.ryan.tabatatimer.app-mergeDebugResources-51:/values-fr-rCA/values-fr-rCA.xml",
             "map": [
                 {
                     "source": "/Users/ryan/.gradle/caches/8.13/transforms/10cbb3acb2d628b98ed3beba345db60c/transformed/jetified-foundation/res/values-fr-rCA/values-fr-rCA.xml",

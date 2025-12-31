@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.ryan.tabatatimer.app-mergeDebugResources-50:/values-tr/values-tr.xml",
+            "outputFile": "com.ryan.tabatatimer.app-mergeDebugResources-51:/values-tr/values-tr.xml",
             "map": [
                 {
                     "source": "/Users/ryan/.gradle/caches/8.13/transforms/6acf05f38cc2a1199318f881d8dca53e/transformed/jetified-ui/res/values-tr/values-tr.xml",

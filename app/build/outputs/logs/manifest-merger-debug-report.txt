@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:2:1-29:12
-INJECTED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:2:1-29:12
-INJECTED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:2:1-29:12
-INJECTED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:2:1-29:12
+ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:2:1-40:12
+INJECTED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:2:1-40:12
+INJECTED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:2:1-40:12
+INJECTED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:2:1-40:12
 MERGED from [androidx.navigation:navigation-common:2.7.7] /Users/ryan/.gradle/caches/8.13/transforms/f4b54df7b3edc4928bbff16a10bac107/transformed/navigation-common-2.7.7/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.navigation:navigation-runtime:2.7.7] /Users/ryan/.gradle/caches/8.13/transforms/9b61c722be78f3383574214175d19220/transformed/navigation-runtime-2.7.7/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.navigation:navigation-common-ktx:2.7.7] /Users/ryan/.gradle/caches/8.13/transforms/14b3642ce0c5520a54a5613470833e81/transformed/navigation-common-ktx-2.7.7/AndroidManifest.xml:2:1-7:12
@@ -51,6 +51,7 @@ MERGED from [androidx.lifecycle:lifecycle-runtime-ktx-android:2.9.4] /Users/ryan
 MERGED from [androidx.lifecycle:lifecycle-runtime-android:2.9.4] /Users/ryan/.gradle/caches/8.13/transforms/bcff811fbbda20e222cc17e582ad49a9/transformed/jetified-lifecycle-runtime-release/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.lifecycle:lifecycle-process:2.9.4] /Users/ryan/.gradle/caches/8.13/transforms/8a0a79220a616616f3393f98d6fbc895/transformed/jetified-lifecycle-process-2.9.4/AndroidManifest.xml:17:1-35:12
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4] /Users/ryan/.gradle/caches/8.13/transforms/86a51f8fc90c34aaa516334f04698f63/transformed/jetified-lifecycle-viewmodel-ktx-2.9.4/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-service:2.9.4] /Users/ryan/.gradle/caches/8.13/transforms/5d956a9989dfd2a682a825cfd356bdfd/transformed/jetified-lifecycle-service-2.9.4/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate-android:2.9.4] /Users/ryan/.gradle/caches/8.13/transforms/15b1d709fa5ef262ab0654c791b39efb/transformed/jetified-lifecycle-viewmodel-savedstate-release/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.savedstate:savedstate-android:1.3.2] /Users/ryan/.gradle/caches/8.13/transforms/4b64d939c80603856a9e0bae02045c72/transformed/jetified-savedstate-release/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.savedstate:savedstate-ktx:1.3.2] /Users/ryan/.gradle/caches/8.13/transforms/07ec1593b3497dbc70377f7aab58bf25/transformed/jetified-savedstate-ktx-1.3.2/AndroidManifest.xml:2:1-7:12
@@ -87,9 +88,25 @@ MERGED from [androidx.print:print:1.0.0] /Users/ryan/.gradle/caches/8.13/transfo
 		INJECTED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml
 	xmlns:android
 		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:2:11-69
+uses-permission#android.permission.FOREGROUND_SERVICE
+ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:5:5-77
+	android:name
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:5:22-74
+uses-permission#android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK
+ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:6:5-92
+	android:name
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:6:22-89
+uses-permission#android.permission.WAKE_LOCK
+ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:7:5-68
+	android:name
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:7:22-65
+uses-permission#android.permission.POST_NOTIFICATIONS
+ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:8:5-77
+	android:name
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:8:22-74
 application
-ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:5:5-27:19
-INJECTED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:5:5-27:19
+ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:10:5-38:19
+INJECTED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:10:5-38:19
 MERGED from [androidx.compose.ui:ui-tooling-android:1.10.0] /Users/ryan/.gradle/caches/8.13/transforms/f5ffce819bc6aac7bb4a8884e8e3a01d/transformed/jetified-ui-tooling/AndroidManifest.xml:22:5-26:19
 MERGED from [androidx.compose.ui:ui-tooling-android:1.10.0] /Users/ryan/.gradle/caches/8.13/transforms/f5ffce819bc6aac7bb4a8884e8e3a01d/transformed/jetified-ui-tooling/AndroidManifest.xml:22:5-26:19
 MERGED from [androidx.compose.ui:ui-test-manifest:1.10.0] /Users/ryan/.gradle/caches/8.13/transforms/7989458a0d06c6a2939a8898e1ada7df/transformed/jetified-ui-test-manifest-1.10.0/AndroidManifest.xml:22:5-27:19
@@ -115,45 +132,55 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/ryan/.gradle/caches/
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.16.0] /Users/ryan/.gradle/caches/8.13/transforms/14783734308dd8a3ac0669d71f232113/transformed/core-1.16.0/AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:13:9-35
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:18:9-35
 	android:label
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:11:9-41
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:16:9-41
 	android:fullBackupContent
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:9:9-54
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:14:9-54
 	android:roundIcon
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:12:9-50
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:17:9-50
 	tools:targetApi
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:15:9-29
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:20:9-29
 	android:icon
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:10:9-45
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:15:9-45
 	android:allowBackup
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:7:9-35
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:12:9-35
 	android:theme
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:14:9-49
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:19:9-49
 	android:dataExtractionRules
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:8:9-65
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:13:9-65
 	android:name
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:6:9-42
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:11:9-42
 activity#com.ryan.tabatatimer.MainActivity
-ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:16:9-26:20
+ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:21:9-31:20
 	android:label
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:19:13-45
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:24:13-45
 	android:exported
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:18:13-36
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:23:13-36
 	android:theme
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:20:13-53
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:25:13-53
 	android:name
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:17:13-41
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:22:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:21:13-25:29
+ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:26:13-30:29
 action#android.intent.action.MAIN
-ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:22:17-69
+ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:27:17-69
 	android:name
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:22:25-66
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:27:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:24:17-77
+ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:29:17-77
 	android:name
-		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:24:27-74
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:29:27-74
+service#com.ryan.tabatatimer.service.TimerService
+ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:33:9-37:61
+	android:enabled
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:35:13-35
+	android:exported
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:36:13-37
+	android:foregroundServiceType
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:37:13-58
+	android:name
+		ADDED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml:34:13-49
 uses-sdk
 INJECTED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/ryan/Developer/Android/tabata-timer/app/src/main/AndroidManifest.xml
@@ -252,6 +279,8 @@ MERGED from [androidx.lifecycle:lifecycle-process:2.9.4] /Users/ryan/.gradle/cac
 MERGED from [androidx.lifecycle:lifecycle-process:2.9.4] /Users/ryan/.gradle/caches/8.13/transforms/8a0a79220a616616f3393f98d6fbc895/transformed/jetified-lifecycle-process-2.9.4/AndroidManifest.xml:21:5-44
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4] /Users/ryan/.gradle/caches/8.13/transforms/86a51f8fc90c34aaa516334f04698f63/transformed/jetified-lifecycle-viewmodel-ktx-2.9.4/AndroidManifest.xml:5:5-44
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4] /Users/ryan/.gradle/caches/8.13/transforms/86a51f8fc90c34aaa516334f04698f63/transformed/jetified-lifecycle-viewmodel-ktx-2.9.4/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-service:2.9.4] /Users/ryan/.gradle/caches/8.13/transforms/5d956a9989dfd2a682a825cfd356bdfd/transformed/jetified-lifecycle-service-2.9.4/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-service:2.9.4] /Users/ryan/.gradle/caches/8.13/transforms/5d956a9989dfd2a682a825cfd356bdfd/transformed/jetified-lifecycle-service-2.9.4/AndroidManifest.xml:5:5-44
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate-android:2.9.4] /Users/ryan/.gradle/caches/8.13/transforms/15b1d709fa5ef262ab0654c791b39efb/transformed/jetified-lifecycle-viewmodel-savedstate-release/AndroidManifest.xml:20:5-44
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate-android:2.9.4] /Users/ryan/.gradle/caches/8.13/transforms/15b1d709fa5ef262ab0654c791b39efb/transformed/jetified-lifecycle-viewmodel-savedstate-release/AndroidManifest.xml:20:5-44
 MERGED from [androidx.savedstate:savedstate-android:1.3.2] /Users/ryan/.gradle/caches/8.13/transforms/4b64d939c80603856a9e0bae02045c72/transformed/jetified-savedstate-release/AndroidManifest.xml:20:5-44

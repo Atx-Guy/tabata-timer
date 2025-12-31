@@ -1,8 +1,15 @@
 package com.ryan.tabatatimer.ui
 
+import android.app.Activity
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.net.Uri
+import android.os.IBinder
 import android.view.WindowManager
-import androidx.compose.foundation.background
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -20,22 +27,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.gson.Gson
+import com.ryan.tabatatimer.model.TimerPhase
+import com.ryan.tabatatimer.model.TimerState
 import com.ryan.tabatatimer.model.Workout
+import com.ryan.tabatatimer.service.TimerService
 import com.ryan.tabatatimer.ui.theme.FinishedColor
 import com.ryan.tabatatimer.ui.theme.RestColor
-import com.ryan.tabatatimer.ui.theme.UpNextColor
 import com.ryan.tabatatimer.ui.theme.WarmupColor
 import com.ryan.tabatatimer.ui.theme.WorkColor
-import kotlinx.coroutines.delay
-import android.app.Activity
-
-import com.ryan.tabatatimer.util.SoundManager
+import com.ryan.tabatatimer.ui.theme.DarkBackground
 
 @Composable
 fun TimerScreen(
     workoutJson: String,
-    onNavigateBack: () -> Unit,
-    soundManager: SoundManager
+    onNavigateBack: () -> Unit
 ) {
     val workout = remember(workoutJson) {
         try {
@@ -62,90 +67,95 @@ fun TimerScreen(
             window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
-
-    var isPaused by remember { mutableStateOf(false) }
     
-    // Convert workout structure into a flat list of intervals for easier processing
-    // Type: 0=Warmup, 1=Work, 2=Rest, 3=Finished
-    data class Interval(val type: Int, val duration: Int, val roundIndex: Int)
-    
-    val intervals = remember(workout) {
-        val list = mutableListOf<Interval>()
-        if (workout.warmupSeconds > 0) {
-            list.add(Interval(0, workout.warmupSeconds, 0))
-        }
-        for (i in 1..workout.rounds) {
-            list.add(Interval(1, workout.workDurationSeconds, i))
-            if (i < workout.rounds || workout.restDurationSeconds > 0) {
-                 // Usually last rest is optional but standard tabata includes it or specific cool down.
-                 // For simplicity, we add rest after every work, unless it's the very last one? 
-                 // Let's assume standard behavior: Work -> Rest -> Work -> Rest.
-                 if (i < workout.rounds) {
-                     list.add(Interval(2, workout.restDurationSeconds, i))
-                 }
+    // Service Binding
+    var timerService by remember { mutableStateOf<TimerService?>(null) }
+    val connection = remember {
+        object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                val binder = service as TimerService.LocalBinder
+                timerService = binder.getService()
             }
-        }
-        // Add a "Finished" state
-        list.add(Interval(3, 0, workout.rounds)) 
-        list
-    }
-
-    var currentIntervalIndex by remember { mutableIntStateOf(0) }
-    var timeLeft by remember { mutableIntStateOf(intervals.first().duration) }
-
-    LaunchedEffect(key1 = isPaused, key2 = currentIntervalIndex) {
-        if (!isPaused && currentIntervalIndex < intervals.size - 1) { // Don't tick if finished
-            while (timeLeft > 0) {
-                delay(1000L)
-                timeLeft--
-            }
-            // Move to next interval
-            if (currentIntervalIndex < intervals.size - 1) {
-                currentIntervalIndex++
-                timeLeft = intervals[currentIntervalIndex].duration
-                
-                // Audio Cues
-                val newInterval = intervals[currentIntervalIndex]
-                if (newInterval.type == 1) { // Work
-                    soundManager.playWorkSound()
-                } else if (newInterval.type == 2) { // Rest
-                    soundManager.playRestSound()
-                }
+            override fun onServiceDisconnected(name: ComponentName?) {
+                timerService = null
             }
         }
     }
 
-    val currentInterval = intervals[currentIntervalIndex]
+    DisposableEffect(Unit) {
+        val intent = Intent(context, TimerService::class.java)
+        context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        context.startForegroundService(intent) 
+        
+        onDispose {
+            context.unbindService(connection)
+        }
+    }
     
-    // Theme Logic based on State
-    val (stateText, stateColor) = when (currentInterval.type) {
-        0 -> "WARM UP" to WarmupColor
-        1 -> "WORK" to WorkColor
-        2 -> "REST" to RestColor
-        3 -> "FINISHED" to FinishedColor
-        else -> "" to Color.White
+    LaunchedEffect(timerService) {
+        if (timerService != null) {
+            val state = timerService!!.timerState.value
+            if (!state.isRunning && state.phase != TimerPhase.FINISHED) {
+                timerService!!.startWorkout(workout)
+            }
+        }
     }
 
-    val nextInterval = intervals.getOrNull(currentIntervalIndex + 1)
-    val nextText = when (nextInterval?.type) {
-        1 -> "Work (${nextInterval.duration}s)"
-        2 -> "Rest (${nextInterval.duration}s)"
-        3 -> "Finish"
-        else -> ""
+    val timerState by timerService?.timerState?.collectAsState() ?: remember { mutableStateOf(TimerState()) }
+
+    // FLUID BACKGROUND COLOR LOGIC
+    val targetColor = when (timerState.phase) {
+        TimerPhase.PREPARE -> WarmupColor
+        TimerPhase.WORK -> WorkColor
+        TimerPhase.REST -> RestColor
+        TimerPhase.FINISHED -> FinishedColor
     }
+
+    // Animate color change over 500ms
+    val animatedBackgroundColor by animateColorAsState(
+        targetValue = targetColor,
+        animationSpec = tween(durationMillis = 500),
+        label = "BackgroundColor"
+    )
+
+    // Contrast logic: If background is dark (Finished), use white text. 
+    // If background is bright (Work/Rest), use dark text or white depending on exact shade.
+    // Given WorkColor (Lime) and RestColor (Orange), Black text is often better, or White with shadow.
+    // Let's stick to White for High Contrast purely, or Black if colors are very bright.
+    // WorkColor(0xFF76FF03) is very bright -> Black text.
+    // RestColor(0xFFFF3D00) is med/dark -> White text.
+    // WarmupColor(0xFFFFAB00) is bright -> Black text.
+    // FinishedColor(0xFF9E9E9E) is med -> White text.
+    
+    val contentColor = when(timerState.phase) {
+        TimerPhase.WORK, TimerPhase.PREPARE -> Color.Black
+        else -> Color.White
+    }
+
+    val phaseText = when (timerState.phase) {
+        TimerPhase.PREPARE -> "WARM UP"
+        TimerPhase.WORK -> "WORK"
+        TimerPhase.REST -> "REST"
+        TimerPhase.FINISHED -> "FINISHED"
+    }
+
+    val isFinished = timerState.phase == TimerPhase.FINISHED
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background, // Deep Charcoal
+        containerColor = animatedBackgroundColor, 
+        contentColor = contentColor,
         floatingActionButton = {
-            if (currentInterval.type != 3) {
+            if (!isFinished) {
                 FloatingActionButton(
-                    onClick = { isPaused = !isPaused },
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
+                    onClick = { 
+                        if (timerState.isRunning) timerService?.pauseTimer() else timerService?.resumeTimer()
+                    },
+                    containerColor = Color.White.copy(alpha = 0.9f),
+                    contentColor = Color.Black
                 ) {
                     Icon(
-                        if (isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
-                        contentDescription = if (isPaused) "Resume" else "Pause"
+                        if (timerState.isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = if (timerState.isRunning) "Pause" else "Resume"
                     )
                 }
             }
@@ -159,78 +169,79 @@ fun TimerScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header: Round Info & Close
+            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onNavigateBack) {
+                IconButton(onClick = {
+                    timerService?.stopTimer()
+                    onNavigateBack()
+                }) {
                     Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack, // Changed to AutoMirrored
+                        Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Exit",
-                        tint = MaterialTheme.colorScheme.onBackground
+                        tint = contentColor.copy(alpha = 0.8f)
                     )
                 }
-                if (currentInterval.type in 1..2) {
+                if (!isFinished) {
                     Text(
-                        text = "ROUND ${currentInterval.roundIndex}/${workout.rounds}",
+                        text = "ROUND ${timerState.currentRound}/${timerState.totalRounds}",
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = contentColor.copy(alpha = 0.8f)
                     )
                 }
             }
 
-            // Main Display
+            // Central Display
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = stateText,
+                    text = phaseText,
                     style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Black),
-                    color = stateColor,
+                    color = contentColor,
                     textAlign = TextAlign.Center
                 )
                 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(32.dp))
                 
-                if (currentInterval.type != 3) {
+                if (!isFinished) {
                     Text(
-                        text = "$timeLeft",
+                        text = "${timerState.timeRemainingSeconds}",
                         style = MaterialTheme.typography.displayLarge.copy(
-                            fontSize = 120.sp,
+                            fontSize = 140.sp, 
                             fontWeight = FontWeight.Bold
                         ),
-                        color = stateColor
+                        color = contentColor
                     )
                 } else {
                      Icon(
-                        imageVector = Icons.Default.Close, // Or a checkmark
+                        imageVector = Icons.Default.Close, 
                         contentDescription = "Done",
-                        modifier = Modifier.size(100.dp),
-                        tint = FinishedColor
+                        modifier = Modifier.size(120.dp),
+                        tint = contentColor
                      )
                 }
             }
 
-            // Up Next
+            // Footer
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(bottom = 32.dp)
             ) {
-                if (nextInterval != null && nextInterval.type != 3) {
-                    Text(
-                        text = "UP NEXT",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = nextText,
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = UpNextColor
-                    )
-                } else if (currentInterval.type == 3) {
-                    Button(onClick = onNavigateBack) {
+                 if (isFinished) {
+                    Button(
+                        onClick = {
+                            timerService?.stopTimer()
+                            onNavigateBack()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White, 
+                            contentColor = Color.Black
+                        )
+                    ) {
                         Text("Exit Workout")
                     }
                 }

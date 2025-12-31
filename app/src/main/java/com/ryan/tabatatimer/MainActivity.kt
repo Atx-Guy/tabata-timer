@@ -19,6 +19,14 @@ import com.ryan.tabatatimer.navigation.Screen
 import com.ryan.tabatatimer.ui.SetupScreen
 import com.ryan.tabatatimer.ui.TimerScreen
 import com.ryan.tabatatimer.ui.theme.TabataTimerTheme
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +38,26 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val context = LocalContext.current
+                    val permissionLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestPermission(),
+                        onResult = { isGranted ->
+                            // Handle permission granted or denied if needed
+                        }
+                    )
+
+                    LaunchedEffect(Unit) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            if (ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                ) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                        }
+                    }
+
                     val navController = rememberNavController()
                     val appContainer = (application as TabataApplication).container
                     val soundManager = appContainer.soundManager
@@ -60,8 +88,7 @@ class MainActivity : ComponentActivity() {
                             if (workoutJson != null) {
                                 TimerScreen(
                                     workoutJson = workoutJson,
-                                    onNavigateBack = { navController.popBackStack() },
-                                    soundManager = soundManager
+                                    onNavigateBack = { navController.popBackStack() }
                                 )
                             }
                         }
