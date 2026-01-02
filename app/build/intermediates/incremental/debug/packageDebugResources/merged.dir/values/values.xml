@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="BrandPrimary">#D32F2F</color>
+    <color name="BrandSecondary">#009688</color>
+    <string name="app_name">Tabata Timer</string>
+    <style name="Theme.TabataTimer" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:colorPrimary">@color/BrandPrimary</item>
+        <item name="android:colorSecondary">@color/BrandSecondary</item>
+    </style>
+</resources>

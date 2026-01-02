@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -62,6 +63,8 @@ fun SetupScreen(
     soundManager: SoundManager
 ) {
     val savedWorkouts by viewModel.savedWorkouts.collectAsState()
+    val showPaywall by viewModel.showPaywall.collectAsState()
+    val isProUser by viewModel.isProUser.collectAsState()
 
     // Editor State
     val editorName by viewModel.editorName.collectAsState()
@@ -279,6 +282,29 @@ fun SetupScreen(
                 )
             }
         }
+    }
+
+
+    if (showPaywall) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { viewModel.dismissPaywall() },
+            icon = { Icon(Icons.Default.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            title = { Text("Unlock Unlimited Workouts") },
+            text = { Text("Free users can save 1 workout. Upgrade to Tabata Pro for unlimited timers, smart audio, and more.") },
+            confirmButton = {
+                Button(onClick = { 
+                    viewModel.upgradeToPro()
+                    viewModel.dismissPaywall()
+                }) {
+                    Text("UPGRADE NOW")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.dismissPaywall() }) {
+                    Text("Maybe Later")
+                }
+            }
+        )
     }
 }
 

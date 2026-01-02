@@ -88,8 +88,6 @@ class SoundManager(private val context: Context) {
 
     fun playWorkSound() {
         if (_isAudioEnabled.value) {
-            // Ensure focus is held or ducked
-            // requestAudioFocus() // Can call here if we only want transient focus during beep
             safePlay(workPlayer)
         }
     }
@@ -102,10 +100,15 @@ class SoundManager(private val context: Context) {
 
     private fun safePlay(player: MediaPlayer?) {
         try {
+            requestAudioFocus()
             if (player?.isPlaying == true) {
                 player.seekTo(0)
             } else {
                 player?.start()
+                player?.setOnCompletionListener { 
+                    abandonAudioFocus()
+                    it.setOnCompletionListener(null) // Cleanup
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()

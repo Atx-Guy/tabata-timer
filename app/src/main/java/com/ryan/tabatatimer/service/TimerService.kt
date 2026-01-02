@@ -103,7 +103,6 @@ class TimerService : LifecycleService() {
             totalTimeElapsedSeconds = 0
         )
 
-        soundManager?.requestAudioFocus()
         startForegroundService()
         startTimerLoop()
     }
@@ -118,7 +117,6 @@ class TimerService : LifecycleService() {
     fun resumeTimer() {
         if (currentWorkout == null) return
         _timerState.update { it.copy(isRunning = true) }
-        soundManager?.requestAudioFocus()
         startTimerLoop()
         updateNotification()
     }
@@ -131,23 +129,25 @@ class TimerService : LifecycleService() {
 
     private fun startTimerLoop() {
         timerJob?.cancel()
-        lastTickTime = System.nanoTime()
-        accumulatedTimeMs = 0
         
         timerJob = lifecycleScope.launch(Dispatchers.Default) {
+             // Monotonic Clock: Define the target time for the NEXT tick
+            var nextTickTarget = System.nanoTime() + 1_000_000_000L // +1 Second
+
             while (_timerState.value.isRunning) {
                 val now = System.nanoTime()
-                val deltaMs = (now - lastTickTime) / 1_000_000
-                lastTickTime = now
-                
-                accumulatedTimeMs += deltaMs
-                
-                if (accumulatedTimeMs >= 1000) {
-                    accumulatedTimeMs -= 1000
-                    tick()
+                val delayMs = (nextTickTarget - now) / 1_000_000
+
+                if (delayMs > 0) {
+                    delay(delayMs)
                 }
+
+                // Tick
+                tick()
                 
-                delay(TICK_INTERVAL_MS)
+                // Advance target by exactly 1s from the PREVIOUS target
+                // This prevents drift calculation errors
+                nextTickTarget += 1_000_000_000L
             }
         }
     }

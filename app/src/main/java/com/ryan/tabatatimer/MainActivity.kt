@@ -27,6 +27,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,34 +65,54 @@ class MainActivity : ComponentActivity() {
                     val appContainer = (application as TabataApplication).container
                     val soundManager = appContainer.soundManager
                     
+                    // Music Controller
+                    val musicController = remember { com.ryan.tabatatimer.data.repository.MusicController(context) }
+                    val musicState = musicController.musicState.collectAsState()
+
                     // Release sound resources when activity is destroyed
                     DisposableEffect(Unit) {
                         onDispose {
                             soundManager.release()
+                            musicController.release()
                         }
                     }
 
-                    NavHost(navController = navController, startDestination = Screen.Setup.route) {
-                        composable(Screen.Setup.route) {
-                            SetupScreen(
-                                onStartTimer = { workout ->
-                                    navController.navigate(Screen.Timer.createRoute(workout))
-                                },
-                                soundManager = soundManager
+                    androidx.compose.material3.Scaffold(
+                        bottomBar = {
+                            com.ryan.tabatatimer.ui.components.MiniPlayer(
+                                musicState = musicState.value,
+                                onPlayPause = { musicController.playPause() },
+                                onSkipNext = { musicController.skipNext() },
+                                onSkipPrevious = { musicController.skipPrevious() }
                             )
                         }
-                        
-                        composable(
-                            route = Screen.Timer.route,
-                            arguments = listOf(navArgument("workoutJson") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val workoutJson = backStackEntry.arguments?.getString("workoutJson")
-                            
-                            if (workoutJson != null) {
-                                TimerScreen(
-                                    workoutJson = workoutJson,
-                                    onNavigateBack = { navController.popBackStack() }
+                    ) { innerPadding ->
+                        NavHost(
+                            navController = navController, 
+                            startDestination = Screen.Setup.route,
+                            modifier = Modifier.padding(innerPadding)
+                        ) {
+                            composable(Screen.Setup.route) {
+                                SetupScreen(
+                                    onStartTimer = { workout ->
+                                        navController.navigate(Screen.Timer.createRoute(workout))
+                                    },
+                                    soundManager = soundManager
                                 )
+                            }
+                            
+                            composable(
+                                route = Screen.Timer.route,
+                                arguments = listOf(navArgument("workoutJson") { type = NavType.StringType })
+                            ) { backStackEntry ->
+                                val workoutJson = backStackEntry.arguments?.getString("workoutJson")
+                                
+                                if (workoutJson != null) {
+                                    TimerScreen(
+                                        workoutJson = workoutJson,
+                                        onNavigateBack = { navController.popBackStack() }
+                                    )
+                                }
                             }
                         }
                     }

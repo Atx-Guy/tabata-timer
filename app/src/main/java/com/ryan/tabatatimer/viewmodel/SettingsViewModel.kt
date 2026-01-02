@@ -75,8 +75,31 @@ class SettingsViewModel(private val repository: WorkoutRepository) : ViewModel()
         _editorWorkoutId.value = null
     }
 
+    // Pro State (Mock for Phase 2)
+    private val _isProUser = MutableStateFlow(false)
+    val isProUser: StateFlow<Boolean> = _isProUser.asStateFlow()
+    
+    // One-shot event for UI would be better, but simple state works for Boolean dialogs
+    private val _showPaywall = MutableStateFlow(false)
+    val showPaywall: StateFlow<Boolean> = _showPaywall.asStateFlow()
+
+    fun dismissPaywall() { _showPaywall.value = false }
+    
+    fun upgradeToPro() { _isProUser.value = true }
+
     fun saveOrUpdateWorkout() {
         val currentId = _editorWorkoutId.value
+        val isUpdate = currentId != null
+        
+        // Entitlement Check:
+        // Free users can only have 1 saved workout.
+        // Updates to existing workouts are allowed.
+        // Creation of new workouts beyond limit is blocked.
+        if (!isUpdate && !_isProUser.value && savedWorkouts.value.isNotEmpty()) {
+             _showPaywall.value = true
+             return
+        }
+
         val workout = Workout(
             id = currentId ?: 0, // 0 triggers auto-increment for Insert
             name = _editorName.value,
@@ -96,18 +119,6 @@ class SettingsViewModel(private val repository: WorkoutRepository) : ViewModel()
         }
     }
 
-    fun saveWorkout(name: String, work: Int, rest: Int, rounds: Int, warmup: Int) {
-        val workout = Workout(
-            name = name,
-            workDurationSeconds = work,
-            restDurationSeconds = rest,
-            rounds = rounds,
-            warmupSeconds = warmup
-        )
-        viewModelScope.launch {
-            repository.insertWorkout(workout)
-        }
-    }
 
     fun deleteWorkout(workout: Workout) {
         viewModelScope.launch {
