@@ -29,7 +29,9 @@ import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +64,8 @@ class MainActivity : ComponentActivity() {
                     }
 
                     val navController = rememberNavController()
+                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val isOnTimerScreen = navBackStackEntry?.destination?.route?.startsWith("timer/") == true
                     val appContainer = (application as TabataApplication).container
                     val soundManager = appContainer.soundManager
                     
@@ -79,12 +83,14 @@ class MainActivity : ComponentActivity() {
 
                     androidx.compose.material3.Scaffold(
                         bottomBar = {
-                            com.ryan.tabatatimer.ui.components.MiniPlayer(
-                                musicState = musicState.value,
-                                onPlayPause = { musicController.playPause() },
-                                onSkipNext = { musicController.skipNext() },
-                                onSkipPrevious = { musicController.skipPrevious() }
-                            )
+                            if (musicState.value.isPlaying && isOnTimerScreen) {
+                                com.ryan.tabatatimer.ui.components.MiniPlayer(
+                                    musicState = musicState.value,
+                                    onPlayPause = { musicController.playPause() },
+                                    onSkipNext = { musicController.skipNext() },
+                                    onSkipPrevious = { musicController.skipPrevious() }
+                                )
+                            }
                         }
                     ) { innerPadding ->
                         NavHost(
