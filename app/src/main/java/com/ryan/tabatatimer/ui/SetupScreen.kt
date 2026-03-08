@@ -344,30 +344,29 @@ fun WorkoutCard(
                 )
             }
 
-            // Actions
-            Row {
-                IconButton(onClick = onEdit) {
-                    Icon(
-                        Icons.Default.Edit,
-                        "Edit",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Crossfade(targetState = isOrganizeMode, label = "ActionButtons") { organizing ->
-                    if (organizing) {
-                        IconButton(onClick = onDelete) {
+            // Actions — in organize mode show only Delete; otherwise show Edit + Play
+            Crossfade(targetState = isOrganizeMode, label = "ActionButtons") { organizing ->
+                if (organizing) {
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            Icons.Default.Delete,
+                            "Delete",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                } else {
+                    Row {
+                        IconButton(onClick = onEdit) {
                             Icon(
-                                Icons.Default.Delete,
-                                "Delete",
-                                tint = MaterialTheme.colorScheme.error
+                                Icons.Default.Edit,
+                                "Edit",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                    } else {
                         FilledTonalIconButton(
                             onClick = onPlay,
                             colors = IconButtonDefaults.filledTonalIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary, // Teal
+                                containerColor = MaterialTheme.colorScheme.secondary,
                                 contentColor = MaterialTheme.colorScheme.onSecondary
                             )
                         ) {

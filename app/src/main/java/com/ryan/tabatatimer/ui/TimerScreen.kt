@@ -12,8 +12,9 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
@@ -51,8 +52,13 @@ fun TimerScreen(
     }
 
     if (workout == null) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(
+            Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Text("Error loading workout")
+            Spacer(Modifier.height(16.dp))
             Button(onClick = onNavigateBack) { Text("Go Back") }
         }
         return
@@ -102,6 +108,12 @@ fun TimerScreen(
     }
 
     val timerState by timerService?.timerState?.collectAsState() ?: remember { mutableStateOf(TimerState()) }
+
+    // Intercept system back gesture to cleanly stop the service
+    BackHandler {
+        timerService?.stopTimer()
+        onNavigateBack()
+    }
 
     // FLUID BACKGROUND COLOR LOGIC
     val targetColor = when (timerState.phase) {
@@ -217,12 +229,12 @@ fun TimerScreen(
                         color = contentColor
                     )
                 } else {
-                     Icon(
-                        imageVector = Icons.Default.Close, 
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
                         contentDescription = "Done",
                         modifier = Modifier.size(120.dp),
                         tint = contentColor
-                     )
+                    )
                 }
             }
 

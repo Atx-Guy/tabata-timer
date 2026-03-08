@@ -13,22 +13,23 @@ import com.ryan.tabatatimer.service.MusicService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.launch
 
-class MusicController(private valcontext: Context) {
+class MusicController(private val context: Context) {
 
     private val _musicState = MutableStateFlow(MusicState())
     val musicState: StateFlow<MusicState> = _musicState.asStateFlow()
 
     private var mediaController: MediaController? = null
     private var controllerFuture: ListenableFuture<MediaController>? = null
-    private val scope = CoroutineScope(Dispatchers.Main)
+    // SupervisorJob ensures a child coroutine failure doesn't cancel the whole scope
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var progressJob: Job? = null
 
     init {
@@ -123,6 +124,7 @@ class MusicController(private valcontext: Context) {
     
     fun release() {
         stopProgressLoop()
-        MediaController.releaseFuture(controllerFuture!!)
+        controllerFuture?.let { MediaController.releaseFuture(it) }
+        controllerFuture = null
     }
 }

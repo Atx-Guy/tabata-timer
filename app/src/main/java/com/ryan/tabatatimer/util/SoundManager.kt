@@ -98,29 +98,37 @@ class SoundManager(private val context: Context) {
         }
     }
 
+    @Synchronized
     private fun safePlay(player: MediaPlayer?) {
+        if (player == null) return
         try {
             requestAudioFocus()
-            if (player?.isPlaying == true) {
+            if (player.isPlaying) {
+                // Restart from beginning instead of layering the sound
                 player.seekTo(0)
             } else {
-                player?.start()
-                player?.setOnCompletionListener { 
+                player.start()
+                player.setOnCompletionListener {
                     abandonAudioFocus()
-                    it.setOnCompletionListener(null) // Cleanup
+                    it.setOnCompletionListener(null)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            // Try to recover if player died
+            // Release old broken instances before reloading to prevent memory leak
+            releasePlayers()
             loadPlayers()
         }
     }
 
-    fun release() {
+    private fun releasePlayers() {
         workPlayer?.release()
         restPlayer?.release()
         workPlayer = null
         restPlayer = null
+    }
+
+    fun release() {
+        releasePlayers()
     }
 }

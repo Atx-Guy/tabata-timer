@@ -15,6 +15,7 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.ryan.tabatatimer.MainActivity
 import com.ryan.tabatatimer.R
+import com.ryan.tabatatimer.TabataApplication
 import com.ryan.tabatatimer.model.TimerPhase
 import com.ryan.tabatatimer.model.TimerState
 import com.ryan.tabatatimer.model.Workout
@@ -57,7 +58,8 @@ class TimerService : LifecycleService() {
 
     override fun onCreate() {
         super.onCreate()
-        soundManager = SoundManager(this)
+        // Share the app-level SoundManager so audio toggle from UI applies here too
+        soundManager = (application as TabataApplication).container.soundManager
         createNotificationChannel()
         acquireWakeLock()
     }
@@ -69,8 +71,9 @@ class TimerService : LifecycleService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        // Keep service alive if killed
-        return Service.START_STICKY
+        // START_NOT_STICKY: don't restart automatically — a restarted service with no
+        // workout state would be in an undefined state and confuse the user.
+        return Service.START_NOT_STICKY
     }
 
     fun startWorkout(workout: Workout) {
@@ -82,10 +85,9 @@ class TimerService : LifecycleService() {
         }
         for (i in 1..workout.rounds) {
             list.add(Interval(1, workout.workDurationSeconds, i))
-            if (i < workout.rounds || workout.restDurationSeconds > 0) {
-                 if (i < workout.rounds) {
-                     list.add(Interval(2, workout.restDurationSeconds, i))
-                 }
+            // Add rest interval between rounds but not after the final round
+            if (i < workout.rounds) {
+                list.add(Interval(2, workout.restDurationSeconds, i))
             }
         }
         // Finished state
@@ -173,9 +175,12 @@ class TimerService : LifecycleService() {
             val nextInterval = intervals[currentIntervalIndex]
             
             // Audio Cues
-            if (nextInterval.type == 1) soundManager?.playWorkSound()
-            else if (nextInterval.type == 2) soundManager?.playRestSound()
-            else if (nextInterval.type == 3) soundManager?.playRestSound() // Finish sound?
+            when (nextInterval.type) {
+                1 -> soundManager?.playWorkSound()
+                2 -> soundManager?.playRestSound()
+                // type 3 = FINISHED: play work sound as a "done" signal
+                3 -> soundManager?.playWorkSound()
+            }
             
             _timerState.update {
                 it.copy(
@@ -262,6 +267,8 @@ class TimerService : LifecycleService() {
     override fun onDestroy() {
         super.onDestroy()
         wakeLock?.release()
-        soundManager?.release()
+        // SoundManager is owned by the app container — do not release it here
+        soundManager?.abandonAudioFocus()
+        soundManager = null
     }
 }

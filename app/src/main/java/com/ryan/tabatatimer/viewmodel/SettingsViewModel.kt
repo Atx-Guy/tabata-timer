@@ -1,5 +1,7 @@
 package com.ryan.tabatatimer.viewmodel
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -15,7 +17,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(private val repository: WorkoutRepository) : ViewModel() {
+class SettingsViewModel(
+    private val repository: WorkoutRepository,
+    private val prefs: SharedPreferences
+) : ViewModel() {
 
     val savedWorkouts: StateFlow<List<Workout>> = repository.allWorkouts
         .stateIn(
@@ -75,17 +80,18 @@ class SettingsViewModel(private val repository: WorkoutRepository) : ViewModel()
         _editorWorkoutId.value = null
     }
 
-    // Pro State (Mock for Phase 2)
-    private val _isProUser = MutableStateFlow(false)
+    private val _isProUser = MutableStateFlow(prefs.getBoolean(PREF_IS_PRO, false))
     val isProUser: StateFlow<Boolean> = _isProUser.asStateFlow()
-    
-    // One-shot event for UI would be better, but simple state works for Boolean dialogs
+
     private val _showPaywall = MutableStateFlow(false)
     val showPaywall: StateFlow<Boolean> = _showPaywall.asStateFlow()
 
     fun dismissPaywall() { _showPaywall.value = false }
-    
-    fun upgradeToPro() { _isProUser.value = true }
+
+    fun upgradeToPro() {
+        _isProUser.value = true
+        prefs.edit().putBoolean(PREF_IS_PRO, true).apply()
+    }
 
     fun saveOrUpdateWorkout() {
         val currentId = _editorWorkoutId.value
@@ -131,11 +137,14 @@ class SettingsViewModel(private val repository: WorkoutRepository) : ViewModel()
     }
 
     companion object {
+        private const val PREF_IS_PRO = "is_pro_user"
+
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as TabataApplication)
                 val repository = application.container.workoutRepository
-                SettingsViewModel(repository)
+                val prefs = application.getSharedPreferences("tabata_prefs", Context.MODE_PRIVATE)
+                SettingsViewModel(repository, prefs)
             }
         }
     }
