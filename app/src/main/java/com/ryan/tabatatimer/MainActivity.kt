@@ -83,7 +83,10 @@ class MainActivity : ComponentActivity() {
 
                     androidx.compose.material3.Scaffold(
                         bottomBar = {
-                            if (musicState.value.isPlaying && isOnTimerScreen) {
+                            // Only show the mini player on the Setup screen when music is
+                            // actively playing. Never show it on the Timer screen — the
+                            // workout display should be distraction-free.
+                            if (musicState.value.isPlaying && !isOnTimerScreen) {
                                 com.ryan.tabatatimer.ui.components.MiniPlayer(
                                     musicState = musicState.value,
                                     onPlayPause = { musicController.playPause() },
