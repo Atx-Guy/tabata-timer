@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.launch
 
-class MusicController(private valcontext: Context) {
+class MusicController(private val context: Context) {
 
     private val _musicState = MutableStateFlow(MusicState())
     val musicState: StateFlow<MusicState> = _musicState.asStateFlow()
